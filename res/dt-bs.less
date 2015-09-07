@@ -1,0 +1,122 @@
+
+@-moz-keyframes dt-spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes dt-spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes dt-spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+.dt-a-spin {
+	-webkit-animation: dt-spin 2s linear infinite;
+	-moz-animation: dt-spin 2s linear infinite;
+	animation: dt-spin 2s linear infinite;
+}
+
+div.dt-wrapper {
+	text-align: right;
+	
+	.dt-clickable { cursor: pointer; }
+	.dt-display-none { display: none; }
+
+	div.dt-controls {
+		> button {
+			color: #888;
+			
+			border-bottom-left-radius: 0px;
+			border-bottom-right-radius: 0px;
+			border-bottom: 0px;
+		}
+		
+		> ul {
+			top: 27px;
+			right: 0px;
+			left: inherit;
+			
+			border-top-right-radius: 0px;
+			
+			> li {
+				
+				> a {
+					padding-top: 4px;
+					padding-bottom: 4px;
+					
+					> span.dt-hidden-icon { padding-right: 5px; }
+				}
+				
+				&.dt-column-hidden { > a { color: #888; } }
+				
+				&.dt-drag-target {
+					> a {
+						padding-top: 0px;
+						border-top: 4px solid #337ab7;
+					}
+					
+				}
+				
+				&.dt-drag-end-target {
+					> a { color: #888; }
+				}
+			}
+			
+			&:not(.dt-dragging) > li.dt-drag-end-target { display: none; }
+		}
+	}
+		
+	div.dt-table-wrapper {
+		text-align: left;
+		
+		table.dt-table {
+			margin-bottom: 0px;
+			border-bottom: 1px solid #ddd;
+			
+			> thead > tr > th {
+				
+				span.dt-sort {
+					color: #aaa;
+					
+					&.dt-sort-active {
+						color: #555;
+					}
+				}
+				
+			}
+			
+			> tbody {
+				> tr.dt-no-rows > td {
+					color: #aaa;
+					text-align: center;
+				}
+			}
+			
+			td.dt-minimize,th.dt-minimize {
+				white-space: nowrap;
+				width: 10px;
+			}
+		}
+	}
+
+	div.dt-pagination-wrapper {
+		display: inline-block;
+		text-align: left;
+		
+		margin-top: 8px;
+		margin-bottom: 20px;
+
+		div.dt-pagination {
+			
+			width: 10px;
+			
+			input.dt-page-input {
+				width: auto;
+				text-align: right;
+			}
+		
+			span.dt-busy {
+				color: #aaa;
+				
+				&.dt-busy-active {
+					color: #333;
+					.dt-a-spin;
+				}
+			}
+		
+		}
+	}
+}
