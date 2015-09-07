@@ -250,25 +250,25 @@ bundle.row = (parent,row,i,columns,slice,body,opts) => {
 	
 	columns.forEach(column=>{
 		let value = column.mapper()(row,i,slice,column,body,opts);
-		column.td_renderer()(tr,value,column,body,opts);
+		column.td_renderer()(tr,value,row,column,body,opts);
 	});
 	
 	parent.appendChild(tr);
 };
 
-bundle.td = (parent,value,column,body,opts) => {
+bundle.td = (parent,value,row,column,body,opts) => {
 	let td = tag('td',{class:(column.classes()||'')});
 	
 	if( column.minimize() )
 		td.className += ' dt-minimize';
 
-	column.cell_renderer()(td,value,column,body,opts);
+	column.cell_renderer()(td,value,row,column,body,opts);
 	
 	parent.appendChild(td);
 };
 
-bundle.cell = (parent,value,column,body,opts) => {
-	let rendered_value = column.value_renderer()(value,column,body,opts);
+bundle.cell = (parent,value,row,column,body,opts) => {
+	let rendered_value = column.value_renderer()(value,row,column,body,opts);
 	if( rendered_value!=null ) parent.appendChild(rendered_value);
 };
 
