@@ -197,6 +197,7 @@ export class Column {
 		this.sort = r.property(this,'column.sort',opts.sort);
 		this.controllable = r.property(this,'column.controllable',opts.reorderable);
 		this.minimize = r.property(this,'column.minimize',opts.minimize);
+		this.align = r.property(this,'column.align',opts.align);
 		
 		this.mapper = r.property(this,'column.mapper',opts.mapper);
 		this.header_th_renderer = r.property(this,'column.header_th_renderer',opts.header_th_renderer);

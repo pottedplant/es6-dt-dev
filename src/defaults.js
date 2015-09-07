@@ -25,7 +25,8 @@ export function columns_transformer(columns,ordered,table) {
 export function sort_manager(column,table) {
 	table.columns().forEach(c=>{
 		if( c!==column )
-			c.sort(null);
+			if( c.sortable() && c.allow_no_sort() )
+				c.sort(null);
 	});
 }
 

@@ -73,7 +73,7 @@ bundle.controls = (controls,opts) => {
 			let li,icon;
 			let li_classes = `dt-clickable ${c.hidden() ? 'dt-column-hidden' : ''}`;
 			ul.appendChild(li=tag('li',{class:li_classes,draggable:true},tag('a',{},
-				icon=tag('span',{class:'dt-hidden-icon glyphicon glyphicon-ok'}),
+				icon=tag('span',{class:'dt-hidden-icon glyphicon glyphicon-eye-open'}),
 				text(' '),
 				text(c.label()||'')
 			)));
@@ -166,6 +166,9 @@ bundle.header = (header,columns,opts) => {
 
 bundle.header_th = (tr,column,header,opts) => {
 	let th = tag('th',{class:(column.classes()||'')});
+	
+	if( column.align() )
+		th.className += ` dt-align-${column.align()}`;
 
 	column.header_label_renderer()(th,column,header,opts);
 	
@@ -259,6 +262,9 @@ bundle.row = (parent,row,i,columns,slice,body,opts) => {
 bundle.td = (parent,value,row,column,body,opts) => {
 	let td = tag('td',{class:(column.classes()||'')});
 	
+	if( column.align() )
+		td.className += ` dt-align-${column.align()}`;
+		
 	if( column.minimize() )
 		td.className += ' dt-minimize';
 

@@ -37,10 +37,13 @@ div.dt-wrapper {
 					padding-top: 4px;
 					padding-bottom: 4px;
 					
-					> span.dt-hidden-icon { padding-right: 5px; }
+					> span.dt-hidden-icon { padding-right: 5px; color: #666; }
 				}
 				
-				&.dt-column-hidden { > a { color: #888; } }
+				&.dt-column-hidden > a { 
+					color: #888;
+					> span.dt-hidden-icon { visibility: hidden; } 
+				}
 				
 				&.dt-drag-target {
 					> a {
@@ -88,6 +91,10 @@ div.dt-wrapper {
 			td.dt-minimize,th.dt-minimize {
 				white-space: nowrap;
 				width: 10px;
+				
+				&.dt-align-left { text-align: left; }
+				&.dt-align-center { text-align: center; }
+				&.dt-align-right{ text-align: right; }
 			}
 		}
 	}
