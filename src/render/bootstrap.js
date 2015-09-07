@@ -1,40 +1,37 @@
 import {tag,text,remove_children} from './dom';
+import {value_renderer} from './shared';
 
-export let renderer_bundle = {};
-export default renderer_bundle;
+export let bundle = {};
+export default bundle;
 
-let bundle = renderer_bundle;
-
-bundle.table = (table,opts) => {
-	let header = table.header();
-	
+bundle.table = (parts,api,table,opts) => {
 	let dom = tag('div',{class:'dt-wrapper'});
 	
-	if( table.controllable() ) {
-		let controls = table.controls();
-		dom.appendChild(controls.dom());
-		controls.redraw();
+	if( parts.controls ) {
+		dom.appendChild(parts.controls);
+		api.controls.redraw();
 	}
-		
 	
-	dom.appendChild(
-		tag('div',{class:'dt-table-wrapper'},
-			tag('table',{class:`table dt-table ${table.classes() || ''}`},
-				header.dom(),
-				table.body().dom()
-			)
-		)
-	);
+	let table_dom = tag('table',{class:`table dt-table ${table.classes() || ''}`});
 	
-	table.redraw_header();
-
-	if( table.pagination_limit() ) {
-		let pagination = table.pagination();
-		dom.appendChild(pagination.dom());
-		pagination.redraw();
-		pagination.show(0);
+	if( parts.header) {
+		table_dom.appendChild(parts.header);
+		api.header.redraw();
 	}
-		
+	
+	if( parts.body ) {
+		table_dom.appendChild(parts.body);
+		api.body.redraw();
+	}
+	
+	let table_wrapper = tag('div',{class:'dt-table-wrapper'},table_dom);
+	dom.appendChild(table_wrapper);
+	
+	if( parts.pagination ) {
+		dom.appendChild(parts.pagination);
+		api.pagination.redraw();
+	}
+	
 	return dom;
 };
 
@@ -123,7 +120,15 @@ bundle.controls = (controls,opts) => {
 			
 			add_drag_target_support(li,li_classes,o=>false,source=>{
 				ordered.splice(ordered.indexOf(source),1);
-				ordered.push(source);
+				
+				for(let i=ordered.length-1;i>=0;--i) {
+					if( !ordered[i].controllable() )
+						continue;
+					
+					ordered.splice(i+1,0,source);
+					break;
+				}
+				
 				controls.table.columns_order(ordered);
 				
 				controls.table.redraw_header();
@@ -149,7 +154,7 @@ bundle.header = (header,columns,opts) => {
 		remove_children(tr);
 		
 		columns.forEach(column=>{
-			column.header_renderer()(tr,column,header,opts);
+			column.header_th_renderer()(tr,column,header,opts);
 		});
 	};
 	
@@ -159,12 +164,10 @@ bundle.header = (header,columns,opts) => {
 	return thead;
 };
 
-bundle.header_cell = (tr,column,header,opts) => {
+bundle.header_th = (tr,column,header,opts) => {
 	let th = tag('th',{class:(column.classes()||'')});
-	
-	let label = column.label();
-	if( label!=null )
-		th.appendChild(text(label));
+
+	column.header_label_renderer()(th,column,header,opts);
 	
 	if( column.sortable() )
 		column.sort_renderer()(th,column,header,opts);
@@ -173,6 +176,12 @@ bundle.header_cell = (tr,column,header,opts) => {
 		th.className += ' dt-minimize';
 
 	tr.appendChild(th);
+};
+
+bundle.header_label = (th,column,header,opts) => {
+	let label = column.label();
+	if( label!=null )
+		th.appendChild(text(label));
 };
 
 bundle.header_sort = (th,column,header,opts) => {
@@ -192,7 +201,7 @@ bundle.header_sort = (th,column,header,opts) => {
 		switch(column.sort()) {
 		default: column.sort('asc'); break;
 		case 'asc': column.sort('desc'); break;
-		case 'desc': column.sort(null); break;
+		case 'desc': column.sort( column.allow_no_sort() ? null : 'asc' ); break;
 		}
 		
 		header.table.column_sort_changed(column);
@@ -241,23 +250,29 @@ bundle.row = (parent,row,i,columns,slice,body,opts) => {
 	
 	columns.forEach(column=>{
 		let value = column.mapper()(row,i,slice,column,body,opts);
-		column.cell_renderer()(tr,value,column,body,opts);
+		column.td_renderer()(tr,value,column,body,opts);
 	});
 	
 	parent.appendChild(tr);
 };
 
-bundle.cell = (parent,value,column,body,opts) => {
+bundle.td = (parent,value,column,body,opts) => {
 	let td = tag('td',{class:(column.classes()||'')});
 	
 	if( column.minimize() )
 		td.className += ' dt-minimize';
 
-	if( value!=null )
-		td.appendChild(text(value));
+	column.cell_renderer()(td,value,column,body,opts);
 	
 	parent.appendChild(td);
 };
+
+bundle.cell = (parent,value,column,body,opts) => {
+	let rendered_value = column.value_renderer()(value,column,body,opts);
+	if( rendered_value!=null ) parent.appendChild(rendered_value);
+};
+
+bundle.value = value_renderer;
 
 bundle.pagination = (pagination,opts) => {
 	let table = pagination.table;

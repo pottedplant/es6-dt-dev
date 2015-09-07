@@ -1,97 +1,5 @@
-		
-export let signal = (retval)=>{
-	let r = (...args)=>r.fire(args);
-	let l = [];
-	
-	let c = [
-		(n,...args) => { l.slice(0).forEach(l=>l(...args)); }
-	];
-	
-	r.inject = (f) => { c.push(f); return r; };
-	
-	r.fire = (args) => {
-		for(let i=c.length-1;i>=0;--i)
-			c[i]((...t)=>(args=t),...args);
-		
-		return retval; 
-	}
-	
-	r.attach = (f) => {
-		l.push(f);
-		let bound = true;
-		
-		return {
-			detach: ()=>{
-				if( !bound ) return;
-				bound = false;
-				l.some((g,i)=>{
-					if( f!==g ) return false;
-					l.splice(i,1); return true;
-				});
-			}
-		};
-	};
-	
-	return r;
-};
-
-export class Registry {
-	
-	constructor(parent=null,values={}) {
-		this.parent = parent;
-		this.values = values;
-	}
-	
-	child() {
-		return new Registry(this);
-	}
-	
-	set(key,value) {
-		this.values[key] = value;
-		return this;
-	}
-	
-	unset(key) {
-		delete this.values[key];
-	}
-	
-	get(key,recursive=true) {
-		if( key in this.values )
-			return this.values[key];
-		
-		if( !recursive ) return undefined;
-		if( !this.parent ) return undefined;
-		return this.parent.get(key);
-	}
-	
-	property(retval,key,...defaults) {
-		
-		// defaults
-		if( !(key in this.values) )
-			for(let i=0;i<defaults.length;++i)
-				if( defaults[i]!==undefined ) {
-					this.values[key] = defaults[i];
-					break;
-				}
-		
-		let changed_signal = signal();
-		
-		// property
-		let p = (value)=>{
-			if( value!==undefined ) {
-				this.set(key,value);
-				changed_signal(value);
-				return retval;
-			}
-			
-			return this.get(key);
-		};
-		
-		p.changed = changed_signal;
-		return p;
-	}
-	
-}
+import {signal} from './util';
+import {Registry} from './registry';
 
 export class Tables extends Registry {
 	
@@ -174,6 +82,7 @@ export class Table {
 		this.fetcher = registry.property(this,'table.fetcher',opts.fetcher);
 		this.controllable = registry.property(this,'table.controllable',opts.controls);
 		this.sort_manager = registry.property(this,'table.sort_manager',opts.sort_manager);
+		this.builder = registry.property(this,'table.builder',opts.builder);
 		
 		this.columns_order = registry.property(this,'table.columnds_order',opts.columns_order);
 		this.pagination_limit = registry.property(this,'table.pagination_limit',opts.pagination_limit);
@@ -225,11 +134,19 @@ export class Table {
 			}
 		});
 		
+		let request_offset = 0;
+		let request_limit;
+
+		if( window ) {
+			request_offset = window.offset;
+			request_limit = window.limit;
+		}
+
 		this.fetching(true);
-		fetcher(window,sort).then(r=>{
+		fetcher(request_offset,request_limit,sort,window).then(r=>{
 			if( this.request_id!=request_id ) return;
 			
-			let offset = window.offset;
+			let offset = request_offset;
 			if( r.offset!=null ) offset = r.offset;
 			
 			let slice = Slice.of(r.data,offset,r.total,r.has_more);
@@ -258,7 +175,7 @@ export class Table {
 	pagination(...params) { return this.registry.get('pagination')(this,...params); }
 	controls(...params) { return this.registry.get('controls')(this,...params); }
 	
-	dom(opts={}) { return this.renderer()(this,opts); }
+	build(opts={}) { return this.builder()(this,opts); }
 	
 }
 
@@ -276,15 +193,19 @@ export class Column {
 		this.classes = r.property(this,'column.classes',opts.classes);
 		this.hidden = r.property(this,'column.hidden',opts.hidden);
 		this.sortable = r.property(this,'column.sortable',opts.sortable);
+		this.allow_no_sort = r.property(this,'column.allow_no_sort',opts.allow_no_sort);
 		this.sort = r.property(this,'column.sort',opts.sort);
 		this.controllable = r.property(this,'column.controllable',opts.reorderable);
 		this.minimize = r.property(this,'column.minimize',opts.minimize);
 		
 		this.mapper = r.property(this,'column.mapper',opts.mapper);
+		this.header_th_renderer = r.property(this,'column.header_th_renderer',opts.header_th_renderer);
+		this.header_label_renderer = r.property(this,'column.header_label_renderer',opts.header_label_renderer);
+		this.td_renderer = r.property(this,'column.td_renderer',opts.td_renderer);
 		this.cell_renderer = r.property(this,'column.cell_renderer',opts.cell_renderer);
+		this.value_renderer = r.property(this,'column.value_renderer',opts.value_renderer);
 		this.sort_renderer = r.property(this,'column.sort_renderer',opts.sort_renderer);
 		
-		this.header_renderer = r.property(this,'column.header_renderer',opts.header_renderer);
 	}
 	
 	index() {

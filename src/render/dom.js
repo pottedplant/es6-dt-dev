@@ -1,5 +1,5 @@
 
-export let tag = (name,attrs,...children) => {
+export function tag(name,attrs,...children) {
 	let r = document.createElement(name);
 	
 	if( attrs )
@@ -9,9 +9,11 @@ export let tag = (name,attrs,...children) => {
 	return r;
 };
 
-export let remove_children = e => {
+export function remove_children(e) {
 	while( e.firstChild!=null )
 		e.removeChild(e.firstChild);
 };
 
-export let text = text => document.createTextNode(text);
+export function text(value) {
+	return document.createTextNode(value);
+}
