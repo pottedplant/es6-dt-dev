@@ -83,7 +83,11 @@ export class Table {
 		this.controllable = registry.property(this,'table.controllable',opts.controls);
 		this.sort_manager = registry.property(this,'table.sort_manager',opts.sort_manager);
 		this.builder = registry.property(this,'table.builder',opts.builder);
-		
+
+		this.body_renderer = registry.property(this,'body.renderer',opts.renderer);
+		this.row_renderer = registry.property(this,'body.row_renderer',opts.row_renderer);
+		this.no_rows_renderer = registry.property(this,'body.no_rows_renderer',opts.no_rows_renderer);
+
 		this.columns_order = registry.property(this,'table.columnds_order',opts.columns_order);
 		this.pagination_limit = registry.property(this,'table.pagination_limit',opts.pagination_limit);
 		
