@@ -73,7 +73,7 @@ export class Table {
 		this.registry = registry = registry.child();
 		this.request_id = 0;
 		
-		this.classes = registry.property(this,'table.classses',opts.classes);
+		this.classes = registry.property(this,'table.classes',opts.classes);
 		this.columns = registry.property(this,'table.columns',opts.columns,[]);
 		this.columns_transformer = registry.property(this,'table.columns_transformer',opts.columns_transformer);
 		this.rows = registry.property(this,'table.rows',opts.rows,Rows.of(Slice.of([])));
